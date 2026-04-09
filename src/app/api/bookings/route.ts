@@ -1,14 +1,17 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+
 import { NextResponse } from "next/server";
-import { getOAuth2Client, createCalendarEvent } from "@/lib/google-calendar";
-import { sendGuestConfirmationEmail, sendHostNotificationEmail } from "@/lib/email";
-import { generateSlots, getDayOfWeekForDate } from "@/lib/slots";
-import { fromZonedTime } from "date-fns-tz";
+import { getServerSession } from "next-auth";
+import { z } from "zod";
 import { format } from "date-fns";
-import { BusyInterval } from "@/types";
+import { fromZonedTime } from "date-fns-tz";
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
+import { getOAuth2Client, createCalendarEvent, getFreeBusy } from "@/lib/google-calendar";
+import { generateSlots, getDayOfWeekForDate } from "@/lib/slots";
+import { sendGuestConfirmationEmail, sendHostNotificationEmail } from "@/lib/email";
+import type { BusyInterval } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 const createBookingSchema = z.object({
   eventTypeId: z.string(),
@@ -94,7 +97,7 @@ export async function POST(req: Request) {
   // Check Google Calendar
   try {
     const auth = getOAuth2Client(host.googleAccessToken, host.googleRefreshToken);
-    const { getFreeBusy } = await import("@/lib/google-calendar");
+    // getFreeBusy already imported at top of file
     const googleBusy = await getFreeBusy(auth, "primary", windowStart, windowEnd);
     for (const b of googleBusy) {
       if (b.start && b.end) {

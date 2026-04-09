@@ -1,9 +1,12 @@
-import { prisma } from "@/lib/prisma";
-import { getFreeBusy, getOAuth2Client } from "@/lib/google-calendar";
-import { generateSlots, getDayOfWeekForDate } from "@/lib/slots";
-import { fromZonedTime } from "date-fns-tz";
+
 import { NextResponse } from "next/server";
-import { BusyInterval } from "@/types";
+import { prisma } from "@/lib/prisma";
+import { fromZonedTime } from "date-fns-tz";
+import { getOAuth2Client, getFreeBusy } from "@/lib/google-calendar";
+import { generateSlots, getDayOfWeekForDate } from "@/lib/slots";
+import type { BusyInterval } from "@/types";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
